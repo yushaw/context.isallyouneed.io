@@ -1,0 +1,112 @@
+.results-page-container {
+    display: flex;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+}
+
+.file-tree-panel {
+    width: 300px; /* Fixed width for the file tree */
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-right: 1px solid #e0e0e0;
+    overflow-y: auto;
+}
+
+.file-tree-panel h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    color: #2c3e50;
+}
+
+.file-tree-panel ul {
+    list-style: none;
+    padding: 0;
+}
+
+.file-tree-panel li.file-tree-item {
+    margin-bottom: 8px;
+    /* Indentation is applied via inline style for now */
+    white-space: nowrap; /* Prevent wrapping of file names */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Show ... for long names */
+}
+
+.file-tree-panel label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.95em;
+    color: #34495e;
+}
+
+.file-tree-panel input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.main-content-panel {
+    flex-grow: 1; /* Takes remaining space */
+    padding: 20px;
+    background-color: #ffffff; /* Changed from results-container to be specific here */
+    overflow-y: auto; /* If content inside becomes scrollable */
+}
+
+.main-content-panel.full-width {
+    /* No specific styles needed, it just won't have the sidebar affecting its width */
+}
+
+.results-container {
+    padding: 20px;
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.results-header h1 {
+    font-size: 1.8em;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.results-header button {
+    padding: 8px 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.results-header button:hover {
+    background-color: #2980b9;
+}
+
+.results-header button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.results-content {
+    background-color: #ffffff; /* Can be removed if main-content-panel has it */
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    white-space: pre-wrap; /* Allows text to wrap and respects newlines */
+    word-wrap: break-word; /* Breaks long words to prevent overflow */
+    font-size: 0.95em;
+    line-height: 1.7;
+    color: #34495e;
+    min-height: 300px; /* Ensure it has some height */
+    max-height: calc(100vh - 150px); /* Adjust based on header and padding */
+    overflow-y: auto;
+} 

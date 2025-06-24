@@ -1,0 +1,30 @@
+.app-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.app-header h1 {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    display: flex; /* For aligning icon and text */
+    align-items: center;
+    justify-content: center;
+}
+
+.app-header h1 .icon-header {
+    color: #3498db; /* Icon color for header */
+    margin-right: 10px;
+    /* size can be controlled by props in lucide-react, e.g. <BoxSelect size={24} /> */
+    /* or by font-size if not overridden by lucide-react defaults */
+    width: 1em; /* Adjust as needed */
+    height: 1em; /* Adjust as needed */
+}
+
+.app-header p {
+    font-size: 1.1em;
+    color: #555;
+} 

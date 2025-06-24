@@ -1,0 +1,54 @@
+/* Styles for UrlInputBox component */
+.url-input-box .box-header svg {
+    margin-right: 10px;
+    color: #3498db;
+}
+
+.url-input-box .url-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.url-input-box .url-input-group input[type="url"] {
+    flex-grow: 1;
+    margin-bottom: 0; /* Remove default margin from global input style */
+}
+
+.url-input-box .url-input-group button {
+    /* Styles for fetch button are mostly covered by global button styles */
+    /* Add specific overrides if needed */
+    white-space: nowrap; /* Prevent text wrapping like "Fetching..." */
+    display: inline-flex; /* Align icon and text in button */
+    align-items: center;
+}
+
+.url-input-box .url-input-group button svg {
+    /* For ArrowRightCircle or Loader2 */
+    margin-right: 6px; /* Space between icon and text */
+}
+
+.url-input-box .icon-loading-animate {
+    animation: spin 1s linear infinite;
+}
+
+/* Removed the larger .loading-indicator as spinner is now inline in button */
+/* .url-input-box .loading-indicator { ... } */
+/* .url-input-box .loading-indicator .spinner { ... } */
+
+/* Keyframes for spinner - can be global if used elsewhere, but fine here for now */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Styling for a loading icon within the button if using an actual icon font/svg */
+.url-input-box button .loading-icon-animate {
+    width: 1em; /* Match text size */
+    height: 1em;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    /* margin-right: 8px; /* If there's no text next to it inside button */
+} 

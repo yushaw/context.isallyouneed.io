@@ -1,0 +1,15 @@
+/* Styles for SettingsBox component */
+.settings-box .box-header svg {
+    margin-right: 10px;
+    color: #3498db;
+}
+
+.settings-box .options-content .coming-soon {
+    color: #777;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px dashed #e0e0e0; /* Added a light dashed border */
+} 

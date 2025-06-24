@@ -1,0 +1,28 @@
+/* Styles for ContextOutputBox component */
+.context-output-box .box-header svg {
+    margin-right: 10px;
+    color: #3498db;
+}
+
+.context-output-box .context-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.context-output-box .context-controls button {
+    flex-grow: 1;
+    display: inline-flex; /* Align icon and text in button */
+    align-items: center;
+    justify-content: center;
+}
+
+.context-output-box .context-controls button svg {
+    margin-right: 8px;
+}
+
+.context-output-box textarea {
+    min-height: 200px;
+    background-color: #fdfdfd;
+    /* id="context-display" removed from JSX, so selector is just textarea */
+} 

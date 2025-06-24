@@ -1,0 +1,98 @@
+/* Styles for CodeInputBox component */
+.code-input-box .box-header svg {
+    /* Style for lucide-react icon in header */
+    margin-right: 10px;
+    color: #3498db;
+}
+
+.code-input-box .file-drop-area {
+    border: 2px dashed #dce4f0;
+    padding: 30px;
+    text-align: center;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    margin-bottom: 20px; /* Added margin for spacing */
+}
+
+.code-input-box .file-drop-area.dragover {
+    background-color: #e9ecef;
+    border-color: #b0c4de;
+}
+
+.code-input-box .upload-icon {
+    /* size={48} is set in component, color can be set here or by prop */
+    color: #3498db;
+    margin-bottom: 15px;
+    display: block; 
+    margin-left: auto; /* Center the icon */
+    margin-right: auto;
+}
+
+.code-input-box .file-drop-area p {
+    margin: 5px 0;
+    color: #555;
+}
+
+.code-input-box .or-text {
+    font-weight: 500;
+    color: #777;
+    margin: 10px 0;
+}
+
+.code-input-box .custom-file-upload {
+    display: inline-flex; 
+    align-items: center;
+    padding: 10px 18px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.code-input-box .custom-file-upload:hover {
+    background-color: #2980b9;
+}
+
+.code-input-box .custom-file-upload svg {
+    /* Style for lucide-react icon in button */
+    margin-right: 8px;
+}
+
+.code-input-box .file-list-preview {
+    margin-top: 20px;
+}
+
+.code-input-box .file-list-preview h4 {
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: #2c3e50; /* Match header style */
+}
+
+.code-input-box .file-list-preview ul {
+    list-style: none;
+    padding: 0;
+    max-height: 150px; /* Add scroll for long lists */
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.code-input-box .file-list-preview li {
+    background-color: #f9f9f9;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    color: #333;
+    border: 1px solid #eee;
+    word-break: break-all; /* Prevent long filenames from breaking layout */
+}
+
+/* Hiding the actual input element - already done inline but good for consistency */
+/* #file-upload-input {
+    display: none;
+} */ 
