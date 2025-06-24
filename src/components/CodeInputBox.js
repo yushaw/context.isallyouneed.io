@@ -255,7 +255,11 @@ const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
         <FileCode2 />
         <h2>{t('files.upload.processor.title')}</h2>
       </div>
-      <p className="box-description">{t('files.upload.processor.description')}</p>
+      <p className="box-description">
+        {t('files.upload.processor.description')}
+        <br />
+        🔒 <strong>{t('files.upload.privacy.note')}</strong>{t('files.upload.privacy.description')}
+      </p>
       <div 
         className={`file-drop-area ${isDragOver ? 'dragover' : ''} ${isProcessing ? 'processing' : ''}`}
         onDrop={handleDrop}
