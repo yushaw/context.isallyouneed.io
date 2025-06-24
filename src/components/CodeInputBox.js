@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import './CodeInputBox.css';
-import { FileCode2, UploadCloud, FilePlus } from 'lucide-react';
+import { FileCode2, UploadCloud, FilePlus, Loader2 } from 'lucide-react';
 import JSZip from 'jszip';
 
 const IGNORE_PATTERNS = [
@@ -90,6 +90,7 @@ const shouldIgnore = (filePath) => {
 const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
   const [selectedFilesDisplay, setSelectedFilesDisplay] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Effect to clear files when resetKey changes (i.e., context is cleared in App)
   React.useEffect(() => {
@@ -101,10 +102,10 @@ const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
       const reader = new FileReader();
       // Use webkitRelativePath if available, otherwise just file.name
       const path = file.webkitRelativePath || file.name;
-      reader.onload = (e) => resolve({ name: file.name, path: path, content: e.target.result, size: file.size, type: file.type });
+      reader.onload = (e) => resolve({ name: file.name, path: path, content: e.target.result, size: file.size, type: file.type, isTextFile: true });
       reader.onerror = (e) => {
         console.error("Error reading file:", file.name, e);
-        resolve({ name: file.name, path: path, content: `Error reading file: ${file.name}`, size: file.size, type: file.type });
+        resolve({ name: file.name, path: path, content: `Error reading file: ${file.name}`, size: file.size, type: file.type, isTextFile: true });
       };
       reader.readAsText(file);
     });
@@ -120,8 +121,13 @@ const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
   const processAndDisplayFiles = useCallback(async (fileList) => {
     if (fileList.length === 0) return;
 
-    let newDisplayFiles = []; // For the main page file list display
-    let filesToProcessPromises = [];
+    // Set loading state immediately to avoid UI blocking
+    setIsProcessing(true);
+    
+    // Use setTimeout to ensure UI updates before heavy processing
+    setTimeout(async () => {
+      let newDisplayFiles = []; // For the main page file list display
+      let filesToProcessPromises = [];
 
     for (const file of fileList) {
       // Use webkitRelativePath for display name if available, provides full path for folders
@@ -134,21 +140,38 @@ const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
           const content = await zip.loadAsync(file);
           const zipFilePromises = [];
           content.forEach((relativePath, zipEntry) => {
-            // zipEntry.name is already the full path within the zip
-            if (!zipEntry.dir && !shouldIgnore(zipEntry.name) && isTextFile(zipEntry.name, null)) {
-              zipFilePromises.push(
-                zipEntry.async('string').then(textContent => ({
-                  name: zipEntry.name, // This is the full path in zip
-                  path: zipEntry.name, // Explicitly set path
-                  content: textContent,
-                  size: textContent.length, 
-                  type: 'text/plain'
-                }))
-                .catch(err => {
-                    console.error("Error reading file from zip:", zipEntry.name, err);
-                    return { name: zipEntry.name, path: zipEntry.name, content: `Error reading file from zip: ${zipEntry.name}`, size: 0, type: 'error' };
-                })
-              );
+            // Process all files (including ignored ones for display)
+            if (!zipEntry.dir) {
+              const isIgnored = shouldIgnore(zipEntry.name);
+              if (isTextFile(zipEntry.name, null) && !isIgnored) {
+                // For text files that are not ignored, read the content
+                zipFilePromises.push(
+                  zipEntry.async('string').then(textContent => ({
+                    name: zipEntry.name,
+                    path: zipEntry.name,
+                    content: textContent,
+                    size: textContent.length, 
+                    type: 'text/plain',
+                    isTextFile: true,
+                    isIgnored: false
+                  }))
+                  .catch(err => {
+                      console.error("Error reading file from zip:", zipEntry.name, err);
+                      return { name: zipEntry.name, path: zipEntry.name, content: `Error reading file from zip: ${zipEntry.name}`, size: 0, type: 'error', isTextFile: true, isIgnored: false };
+                  })
+                );
+              } else {
+                // For non-text files or ignored files, just add metadata
+                zipFilePromises.push(Promise.resolve({
+                  name: zipEntry.name,
+                  path: zipEntry.name,
+                  content: isIgnored ? '[File ignored by filters]' : '[Binary file - content cannot be read]',
+                  size: 0, // We don't have easy access to original size
+                  type: 'binary',
+                  isTextFile: false,
+                  isIgnored: isIgnored
+                }));
+              }
             }
           });
           const processedZipFiles = await Promise.all(zipFilePromises);
@@ -158,21 +181,37 @@ const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
           console.error("Error processing ZIP file:", file.name, error);
           filesToProcessPromises.push(Promise.resolve({ name: file.name, path: file.name, content: `Error processing ZIP: ${error.message}`, size: file.size, type: file.type }));
         }
-      } else if (!shouldIgnore(file.webkitRelativePath || file.name) && isTextFile(file.name, file.type)) {
-        filesToProcessPromises.push(readFileAsText(file));
       } else {
         const path = file.webkitRelativePath || file.name;
-        const reason = shouldIgnore(path) ? 'ignored' : 'not a recognized text file';
-        console.log(`File ${path} (${file.type}) was ${reason}.`);
-        // filesToProcessPromises.push(Promise.resolve({ name: file.name, path: path, content: `[File skipped: ${reason}]`, size: file.size, type: 'skipped' }));
+        if (isTextFile(file.name, file.type)) {
+          // For text files, read the content
+          filesToProcessPromises.push(readFileAsText(file));
+        } else {
+          // For non-text files, just add metadata with ignored status
+          const isIgnored = shouldIgnore(path);
+          filesToProcessPromises.push(Promise.resolve({
+            name: file.name,
+            path: path,
+            content: isIgnored ? '[File ignored by filters]' : '[Binary file - content cannot be read]',
+            size: file.size,
+            type: file.type || 'binary',
+            isTextFile: false,
+            isIgnored: isIgnored
+          }));
+        }
       }
     }
     
     Promise.all(filesToProcessPromises).then(filesWithContent => {
-        onFilesProcessed(filesWithContent.filter(f => f && f.content && !f.content.startsWith('[File skipped'))); 
+        onFilesProcessed(filesWithContent.filter(f => f && f.content)); 
+        setIsProcessing(false);
+    }).catch(error => {
+        console.error('Error processing files:', error);
+        setIsProcessing(false);
     });
 
-    setSelectedFilesDisplay(prevFiles => [...prevFiles, ...newDisplayFiles]);
+      setSelectedFilesDisplay(prevFiles => [...prevFiles, ...newDisplayFiles]);
+    }, 10); // Small delay to ensure UI updates
 
   }, [onFilesProcessed]);
 
@@ -207,17 +246,27 @@ const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
       </div>
       <p className="box-description">Upload files, folders, or a ZIP archive. Text-based files within folders/ZIPs will be extracted.</p>
       <div 
-        className={`file-drop-area ${isDragOver ? 'dragover' : ''}`}
+        className={`file-drop-area ${isDragOver ? 'dragover' : ''} ${isProcessing ? 'processing' : ''}`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
       >
-        <UploadCloud size={48} className="upload-icon" />
-        <p>Drag & drop files here</p>
-        <p className="or-text">or</p>
-        <label htmlFor="file-upload-input" className="custom-file-upload">
-          <FilePlus size={18} /> Choose Files or Folders
-        </label>
+        {isProcessing ? (
+          <>
+            <Loader2 size={48} className="upload-icon loading-animate" />
+            <p>Processing files...</p>
+            <p className="or-text">Please wait while we process your files</p>
+          </>
+        ) : (
+          <>
+            <UploadCloud size={48} className="upload-icon" />
+            <p>Drag & drop files here</p>
+            <p className="or-text">or</p>
+            <label htmlFor="file-upload-input" className="custom-file-upload">
+              <FilePlus size={18} /> Choose Files or Folders
+            </label>
+          </>
+        )}
         <input 
           type="file" 
           id="file-upload-input" 
@@ -227,6 +276,7 @@ const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
           style={{ display: 'none' }} 
           onChange={handleFileChange}
           onClick={(event)=> { event.target.value = null }}
+          disabled={isProcessing}
         />
       </div>
       {selectedFilesDisplay.length > 0 && (

@@ -12,6 +12,8 @@ const ResultsPage = () => {
     const queryParams = new URLSearchParams(location.search);
     const dataKeyFromQuery = queryParams.get('dataKey');
     const dataKeyFromState = location.state?.dataKey;
+    
+    // Prioritize query params over state for better URL sharing
     const dataKey = dataKeyFromQuery || dataKeyFromState;
 
     if (dataKey) {

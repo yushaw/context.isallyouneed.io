@@ -142,4 +142,259 @@ textarea {
 .mb-1 { margin-bottom: 0.5rem; }
 .mb-2 { margin-bottom: 1rem; }
 .mb-3 { margin-bottom: 1.5rem; }
-.mb-4 { margin-bottom: 2rem; } 
+.mb-4 { margin-bottom: 2rem; }
+
+/* Layout Components */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    flex: 1;
+    align-content: start;
+}
+
+.main-content-single {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+}
+
+.bento-box {
+    background: var(--bg-primary);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    transition: box-shadow 0.2s ease;
+}
+
+.bento-box:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.box-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.box-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.box-description {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 16px;
+}
+
+/* Sources Box Styles */
+.sources-box .box-header {
+    justify-content: space-between;
+    align-items: center;
+}
+
+.clear-all-btn {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    margin-left: auto;
+}
+
+.clear-all-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    transform: none;
+}
+
+.sources-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.source-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    transition: background-color 0.2s ease;
+}
+
+.source-item:hover {
+    background: var(--border-color);
+}
+
+.source-checkbox {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.source-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.source-size {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.remove-btn {
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.remove-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    transform: none;
+}
+
+/* File Tree Styles */
+.file-tree {
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.tree-node {
+    user-select: none;
+}
+
+.tree-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: calc(var(--radius) / 2);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.tree-item:hover {
+    background-color: var(--bg-secondary);
+}
+
+.folder-item {
+    font-weight: 500;
+}
+
+.file-item {
+    padding-left: 1.5rem;
+    cursor: default;
+}
+
+.tree-children {
+    margin-left: 1rem;
+}
+
+.tree-folder {
+    margin: 0.125rem 0;
+}
+
+.tree-item .file-size {
+    margin-left: auto;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+/* Checkbox styles */
+.file-checkbox {
+    margin-right: 0.5rem;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.file-item {
+    gap: 0.5rem;
+}
+
+/* Binary file styling */
+.binary-file {
+    opacity: 0.7;
+}
+
+.binary-file .source-name,
+.binary-file span:not(.file-size):not(.file-type-label) {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.file-type-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    background: var(--border-color);
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.file-type-label.config {
+    background: #fbbf24;
+    color: #92400e;
+}
+
+.file-type-label.ignored {
+    background: #ef4444;
+    color: #fef2f2;
+}
+
+/* Config file styling */
+.config-file {
+    opacity: 0.8;
+}
+
+.config-file .source-name,
+.config-file span:not(.file-size):not(.file-type-label) {
+    color: #b45309;
+    font-style: italic;
+}
+
+/* Ignored file styling */
+.ignored-file {
+    opacity: 0.5;
+}
+
+.ignored-file .source-name,
+.ignored-file span:not(.file-size):not(.file-type-label) {
+    color: #ef4444;
+    font-style: italic;
+    text-decoration: line-through;
+} 

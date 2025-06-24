@@ -10,10 +10,17 @@ const UrlInputBox = ({ onUrlFetched }) => {
     if (url) {
       setIsLoading(true);
       let fetchedTextContent = '';
+      
+      // Validate and normalize URL
+      let normalizedUrl = url.trim();
+      if (!normalizedUrl.match(/^https?:\/\//)) {
+        normalizedUrl = 'https://' + normalizedUrl;
+      }
+      
       // Using a public CORS proxy for broader compatibility. 
       // WARNING: Public proxies have limitations, can be unreliable, and are not suitable for production.
       // For production, a self-hosted CORS proxy or server-side fetching is recommended.
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(normalizedUrl)}`;
 
       try {
         const response = await fetch(proxyUrl);
@@ -21,8 +28,8 @@ const UrlInputBox = ({ onUrlFetched }) => {
           // Try fetching directly if proxy fails or if it's a non-HTTP error from proxy itself
           // This direct fetch will likely fail for many sites due to CORS
           try {
-            console.warn(`Proxy fetch failed with status ${response.status}. Trying direct fetch for ${url}...`);
-            const directResponse = await fetch(url);
+            console.warn(`Proxy fetch failed with status ${response.status}. Trying direct fetch for ${normalizedUrl}...`);
+            const directResponse = await fetch(normalizedUrl);
             if (!directResponse.ok) {
                 throw new Error(`Direct fetch failed with status: ${directResponse.status}`);
             }
@@ -49,10 +56,10 @@ const UrlInputBox = ({ onUrlFetched }) => {
         if (extractedText.length > 10000) { // Limit context length
           extractedText = extractedText.substring(0, 10000) + "... [content truncated]";
         }
-        onUrlFetched(extractedText, url);
+        onUrlFetched(extractedText, normalizedUrl);
       } catch (error) {
         console.error("Failed to fetch URL:", error);
-        onUrlFetched(`Error fetching content from ${url}: ${error.message}`, url);
+        onUrlFetched(`Error fetching content from ${normalizedUrl}: ${error.message}`, normalizedUrl);
       }
       setIsLoading(false);
     } else {

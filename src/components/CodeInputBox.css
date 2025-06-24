@@ -92,6 +92,22 @@
     word-break: break-all; /* Prevent long filenames from breaking layout */
 }
 
+/* Processing state */
+.code-input-box .file-drop-area.processing {
+    background-color: #f0f8ff;
+    border-color: #87ceeb;
+    pointer-events: none;
+}
+
+.code-input-box .loading-animate {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 /* Hiding the actual input element - already done inline but good for consistency */
 /* #file-upload-input {
     display: none;
