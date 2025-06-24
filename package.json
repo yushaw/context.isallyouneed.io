@@ -19,7 +19,12 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy:vercel": "vercel --prod",
+    "deploy:netlify": "netlify deploy --prod --dir=build",
+    "deploy:gh-pages": "gh-pages -d build",
+    "serve": "npx serve -s build -p 5000"
   },
   "eslintConfig": {
     "extends": [

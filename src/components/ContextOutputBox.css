@@ -22,7 +22,7 @@
 }
 
 .context-output-box textarea {
-    min-height: 200px;
+    min-height: 400px;
     background-color: #fdfdfd;
     /* id="context-display" removed from JSX, so selector is just textarea */
 } 

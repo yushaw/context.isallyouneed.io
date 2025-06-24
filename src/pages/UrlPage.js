@@ -4,11 +4,13 @@ import Header from '../components/Header';
 import UrlInputBox from '../components/UrlInputBox';
 import ContextOutputBox from '../components/ContextOutputBox';
 import Footer from '../components/Footer';
-import { Trash2, Globe } from 'lucide-react';
+import { Download, Globe } from 'lucide-react';
+import { useLanguage } from '../contexts/SimpleLanguageContext';
 
 const UrlPage = () => {
   const [contextText, setContextText] = useState('');
   const [processedUrls, setProcessedUrls] = useState([]);
+  const { t } = useLanguage();
 
   const handleUrlProcessed = useCallback((content, url) => {
     // Generate context text directly instead of opening new window
@@ -20,10 +22,25 @@ const UrlPage = () => {
     setProcessedUrls([urlData]); // For URLs, we typically only show the latest one
   }, []);
 
-  const handleClearContext = useCallback(() => {
-    setContextText('');
-    setProcessedUrls([]);
-  }, []);
+  const handleDownloadContext = useCallback(() => {
+    if (contextText) {
+      const blob = new Blob([contextText], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const now = new Date();
+      const timestamp = now.toISOString().slice(0, 16).replace('T', '-').replace(':', '');
+      link.download = `url-context-${timestamp}.md`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else {
+      alert(t('files.context.nothing.download'));
+    }
+  }, [contextText, t]);
 
   return (
     <div className="container">
@@ -36,10 +53,10 @@ const UrlPage = () => {
           <div className="bento-box sources-box">
             <div className="box-header">
               <Globe />
-              <h2>Source URL</h2>
-              <button className="clear-all-btn" onClick={handleClearContext}>
-                <Trash2 size={16} />
-                Clear
+              <h2>{t('url.sources.title')}</h2>
+              <button className="clear-all-btn" onClick={handleDownloadContext} disabled={!contextText}>
+                <Download size={16} />
+                {t('url.sources.download')}
               </button>
             </div>
             <div className="sources-list">
@@ -59,9 +76,11 @@ const UrlPage = () => {
           </div>
         )}
         
-        <ContextOutputBox 
-          contextText={contextText}
-        />
+        {contextText && (
+          <ContextOutputBox 
+            contextText={contextText}
+          />
+        )}
       </main>
       <Footer />
     </div>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多语言测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .language-selector {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button.active {
+            background: #27ae60;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .test-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-left: 4px solid #3498db;
+        }
+        .key {
+            font-family: monospace;
+            color: #666;
+            font-size: 12px;
+        }
+        .value {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LLM Context Builder - 多语言测试</h1>
+        
+        <div class="language-selector">
+            <button id="btn-en" class="active" onclick="switchLanguage('en')">English</button>
+            <button id="btn-zh" onclick="switchLanguage('zh')">中文</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>翻译测试结果</h2>
+            <div id="translation-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>模拟页面内容</h2>
+            <div class="test-item">
+                <div class="key">Navigation:</div>
+                <div class="value">
+                    <span id="nav-files"></span> | <span id="nav-url"></span>
+                </div>
+            </div>
+            
+            <div class="test-item">
+                <div class="key">Page Title:</div>
+                <div class="value" id="page-title"></div>
+            </div>
+            
+            <div class="test-item">
+                <div class="key">File Types:</div>
+                <div class="value">
+                    <span id="file-binary"></span>, 
+                    <span id="file-config"></span>, 
+                    <span id="file-ignored"></span>
+                </div>
+            </div>
+            
+            <div class="test-item">
+                <div class="key">Actions:</div>
+                <div class="value" id="action-download"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 翻译数据
+        const translations = {
+            en: {
+                "files": "Files",
+                "url": "URL",
+                "url.title": "Website Scraper",
+                "files.sources.title": "Sources",
+                "files.context.download": "Download",
+                "file.type.binary": "Binary",
+                "file.type.config": "Config",
+                "file.type.ignored": "Ignored",
+                "footer.text": "Context Builder - AI-powered code analysis tool"
+            },
+            zh: {
+                "files": "文件",
+                "url": "网址",
+                "url.title": "网页抓取器",
+                "files.sources.title": "源文件",
+                "files.context.download": "下载",
+                "file.type.binary": "二进制",
+                "file.type.config": "配置",
+                "file.type.ignored": "忽略",
+                "footer.text": "上下文构建器 - AI驱动的代码分析工具"
+            }
+        };
+        
+        let currentLanguage = 'en';
+        
+        // 翻译函数
+        function t(key) {
+            return translations[currentLanguage]?.[key] || translations.en?.[key] || key;
+        }
+        
+        // 切换语言
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            
+            // 更新按钮状态
+            document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-' + lang).classList.add('active');
+            
+            // 更新翻译结果
+            updateTranslations();
+        }
+        
+        // 更新所有翻译
+        function updateTranslations() {
+            // 显示翻译测试结果
+            const resultsDiv = document.getElementById('translation-results');
+            const testKeys = Object.keys(translations.en);
+            
+            resultsDiv.innerHTML = testKeys.map(key => `
+                <div class="test-item">
+                    <div class="key">${key}:</div>
+                    <div class="value">${t(key)}</div>
+                </div>
+            `).join('');
+            
+            // 更新模拟页面内容
+            document.getElementById('nav-files').textContent = t('files');
+            document.getElementById('nav-url').textContent = t('url');
+            document.getElementById('page-title').textContent = t('url.title');
+            document.getElementById('file-binary').textContent = t('file.type.binary');
+            document.getElementById('file-config').textContent = t('file.type.config');
+            document.getElementById('file-ignored').textContent = t('file.type.ignored');
+            document.getElementById('action-download').textContent = t('files.context.download');
+        }
+        
+        // 初始化
+        updateTranslations();
+        
+        console.log('Translation test loaded. Current language:', currentLanguage);
+        console.log('Available translations:', translations);
+        console.log('Test translation for "files":', t('files'));
+    </script>
+</body>
+</html>

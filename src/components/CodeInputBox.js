@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import './CodeInputBox.css';
 import { FileCode2, UploadCloud, FilePlus, Loader2 } from 'lucide-react';
+import { useLanguage } from '../contexts/SimpleLanguageContext';
 import JSZip from 'jszip';
 
 const IGNORE_PATTERNS = [
@@ -88,6 +89,7 @@ const shouldIgnore = (filePath) => {
 };
 
 const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
+  const { t } = useLanguage();
   const [selectedFilesDisplay, setSelectedFilesDisplay] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -120,6 +122,15 @@ const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
 
   const processAndDisplayFiles = useCallback(async (fileList) => {
     if (fileList.length === 0) return;
+
+    // Track file upload event
+    if (window.gtag) {
+      window.gtag('event', 'file_upload', {
+        event_category: 'engagement',
+        event_label: 'files_uploaded',
+        value: fileList.length
+      });
+    }
 
     // Set loading state immediately to avoid UI blocking
     setIsProcessing(true);
@@ -242,9 +253,9 @@ const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
     <div className="bento-box code-input-box">
       <div className="box-header">
         <FileCode2 />
-        <h2>File Processor</h2>
+        <h2>{t('files.upload.processor.title')}</h2>
       </div>
-      <p className="box-description">Upload files, folders, or a ZIP archive. Text-based files within folders/ZIPs will be extracted.</p>
+      <p className="box-description">{t('files.upload.processor.description')}</p>
       <div 
         className={`file-drop-area ${isDragOver ? 'dragover' : ''} ${isProcessing ? 'processing' : ''}`}
         onDrop={handleDrop}
@@ -254,16 +265,16 @@ const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
         {isProcessing ? (
           <>
             <Loader2 size={48} className="upload-icon loading-animate" />
-            <p>Processing files...</p>
-            <p className="or-text">Please wait while we process your files</p>
+            <p>{t('files.upload.loading')}</p>
+            <p className="or-text">{t('files.upload.processing')}</p>
           </>
         ) : (
           <>
             <UploadCloud size={48} className="upload-icon" />
-            <p>Drag & drop files here</p>
+            <p>{t('files.upload.description')}</p>
             <p className="or-text">or</p>
             <label htmlFor="file-upload-input" className="custom-file-upload">
-              <FilePlus size={18} /> Choose Files or Folders
+              <FilePlus size={18} /> {t('files.upload.browse')}
             </label>
           </>
         )}
@@ -281,7 +292,7 @@ const CodeInputBox = ({ onFilesProcessed, key: resetKey }) => {
       </div>
       {selectedFilesDisplay.length > 0 && (
         <div className="file-list-preview">
-          <h4>Selected Files/Folders:</h4>
+          <h4>{t('files.sources.title')}:</h4>
           <ul>
             {selectedFilesDisplay.map((file, index) => (
               <li key={index}>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Translation Test</title>
+</head>
+<body>
+    <h1>简单翻译测试</h1>
+    <div id="test"></div>
+    
+    <script>
+        // 测试基本的翻译功能
+        const translations = {
+            en: {
+                "url.title": "Website Scraper",
+                "files": "Files"
+            },
+            zh: {
+                "url.title": "网页抓取器", 
+                "files": "文件"
+            }
+        };
+        
+        function t(key, lang = 'en') {
+            const keys = key.split('.');
+            let value = translations[lang];
+            
+            for (const k of keys) {
+                value = value?.[k];
+            }
+            
+            return value || key;
+        }
+        
+        document.getElementById('test').innerHTML = `
+            <p>English: ${t('url.title', 'en')}</p>
+            <p>Chinese: ${t('url.title', 'zh')}</p>
+            <p>Files EN: ${t('files', 'en')}</p>
+            <p>Files ZH: ${t('files', 'zh')}</p>
+        `;
+    </script>
+</body>
+</html>

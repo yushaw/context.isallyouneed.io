@@ -227,7 +227,7 @@ textarea {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
 }
 
@@ -289,6 +289,8 @@ textarea {
 .file-tree {
     font-size: 0.875rem;
     line-height: 1.6;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .tree-node {
@@ -301,7 +303,6 @@ textarea {
     gap: 0.5rem;
     padding: 0.25rem 0.5rem;
     border-radius: calc(var(--radius) / 2);
-    cursor: pointer;
     transition: background-color 0.2s ease;
 }
 
@@ -311,6 +312,59 @@ textarea {
 
 .folder-item {
     font-weight: 500;
+    cursor: default;
+}
+
+.folder-expand {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    border-radius: 2px;
+}
+
+.folder-expand:hover {
+    background-color: var(--border-color);
+}
+
+.folder-checkbox {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    transition: all 0.2s ease;
+    background-color: var(--bg-primary);
+}
+
+.folder-checkbox:hover {
+    border-color: var(--primary-color);
+}
+
+.checkbox-empty {
+    width: 100%;
+    height: 100%;
+}
+
+.checkbox-partial {
+    color: var(--primary-color);
+}
+
+.checkbox-checked {
+    color: white;
+}
+
+.folder-checkbox.checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.folder-checkbox.partial {
+    background-color: var(--bg-secondary);
+    border-color: var(--primary-color);
 }
 
 .file-item {
@@ -397,4 +451,77 @@ textarea {
     color: #ef4444;
     font-style: italic;
     text-decoration: line-through;
-} 
+}
+
+/* Additional animations and performance optimizations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Apply fade-in animation to main content */
+.main-content-single {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Apply slide-in animation to bento boxes */
+.bento-box {
+  animation: slideIn 0.4s ease-out;
+  transition: all 0.2s ease;
+}
+
+/* Enhanced hover effects - optimized for performance */
+.bento-box:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Improved button hover effects - reduced animations */
+button:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced tree item interactions - simplified for performance */
+.tree-item:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* Performance optimizations */
+.file-tree,
+.sources-list {
+  contain: layout style;
+}
+
+/* Reduce reflows during folder expansion */
+.tree-children {
+  contain: layout;
+}
+
+/* Smooth scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}

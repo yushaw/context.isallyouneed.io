@@ -1,12 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import '../index.css';
 import Header from '../components/Header';
 import CodeInputBox from '../components/CodeInputBox';
 import ContextOutputBox from '../components/ContextOutputBox';
 import Footer from '../components/Footer';
-import { Trash2, FileText, Folder, ChevronRight, ChevronDown, FileCode2, File } from 'lucide-react';
+import { useLanguage } from '../contexts/SimpleLanguageContext';
+import { Trash2, FileText, Folder, ChevronRight, ChevronDown, FileCode2, File, Minus, Check } from 'lucide-react';
 
 const FilesPage = () => {
+  const { t } = useLanguage();
   const [contextText, setContextText] = useState('');
   const [processedFiles, setProcessedFiles] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState(new Set());
@@ -264,6 +266,167 @@ const FilesPage = () => {
     setExpandedFolders(newExpanded);
   }, [expandedFolders]);
 
+  // Create a file path to index mapping for O(1) lookups
+  const filePathToIndex = useMemo(() => {
+    const map = new Map();
+    processedFiles.forEach((file, index) => {
+      map.set(file.path, index);
+    });
+    return map;
+  }, [processedFiles]);
+
+  // Get folder selection state (0: none, 1: partial, 2: all) with memoization
+  const getFolderSelectionState = useCallback((node, path = '') => {
+    if (!node) return 0;
+    
+    let totalFiles = 0;
+    let selectedCount = 0;
+    
+    // Count files in this folder and subfolders
+    const countFiles = (currentNode) => {
+      // Count files in current node
+      currentNode.files.forEach(file => {
+        const fileIndex = filePathToIndex.get(file.path);
+        if (fileIndex !== undefined) {
+          totalFiles++;
+          if (selectedFiles.has(fileIndex)) {
+            selectedCount++;
+          }
+        }
+      });
+      
+      // Count files in subfolders
+      Object.values(currentNode.children).forEach(child => {
+        countFiles(child);
+      });
+    };
+    
+    countFiles(node);
+    
+    if (selectedCount === 0) return 0; // None selected
+    if (selectedCount === totalFiles) return 2; // All selected
+    return 1; // Partial selection
+  }, [filePathToIndex, selectedFiles]);
+
+  // Toggle folder selection
+  const toggleFolderSelection = useCallback((node, path = '') => {
+    if (!node) return;
+    
+    const currentState = getFolderSelectionState(node, path);
+    const newSelected = new Set(selectedFiles);
+    
+    // Get all file indices in this folder and subfolders
+    const getFileIndices = (currentNode) => {
+      let indices = [];
+      
+      // Get files in current node
+      currentNode.files.forEach(file => {
+        const fileIndex = filePathToIndex.get(file.path);
+        if (fileIndex !== undefined) {
+          indices.push(fileIndex);
+        }
+      });
+      
+      // Get files in subfolders
+      Object.values(currentNode.children).forEach(child => {
+        indices.push(...getFileIndices(child));
+      });
+      
+      return indices;
+    };
+    
+    const fileIndices = getFileIndices(node);
+    
+    // If none or partial selected, select all; if all selected, deselect all
+    if (currentState === 0 || currentState === 1) {
+      // Select all files in folder
+      fileIndices.forEach(index => newSelected.add(index));
+    } else {
+      // Deselect all files in folder
+      fileIndices.forEach(index => newSelected.delete(index));
+    }
+    
+    setSelectedFiles(newSelected);
+    updateContext(processedFiles, newSelected);
+  }, [selectedFiles, getFolderSelectionState, updateContext, filePathToIndex, processedFiles]);
+
+  // Cache folder selection states to avoid recalculation on every render
+  const folderSelectionStates = useMemo(() => {
+    if (!fileTree) return new Map();
+    
+    const stateMap = new Map();
+    
+    const calculateStates = (node, path = '') => {
+      // Calculate state for current folder
+      if (Object.keys(node.children).length > 0 || node.files.length > 0) {
+        stateMap.set(path, getFolderSelectionState(node, path));
+      }
+      
+      // Recursively calculate for child folders
+      Object.entries(node.children).forEach(([name, child]) => {
+        const childPath = path ? `${path}/${name}` : name;
+        calculateStates(child, childPath);
+      });
+    };
+    
+    calculateStates(fileTree);
+    return stateMap;
+  }, [fileTree, getFolderSelectionState]);
+
+  // Memoized folder item component for better performance
+  const FolderItem = React.memo(({ name, child, folderPath, isExpanded, selectionState }) => (
+    <div className="tree-folder">
+      <div className="tree-item folder-item">
+        <div 
+          className="folder-expand"
+          onClick={() => toggleFolder(folderPath)}
+        >
+          {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        </div>
+        <div 
+          className={`folder-checkbox ${selectionState === 1 ? 'partial' : ''} ${selectionState === 2 ? 'checked' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFolderSelection(child, folderPath);
+          }}
+        >
+          {selectionState === 0 && <div className="checkbox-empty"></div>}
+          {selectionState === 1 && <Minus size={12} className="checkbox-partial" />}
+          {selectionState === 2 && <Check size={12} className="checkbox-checked" />}
+        </div>
+        <Folder size={14} />
+        <span>{name}</span>
+      </div>
+      {isExpanded && (
+        <div className="tree-children">
+          {renderFileTree(child, folderPath)}
+        </div>
+      )}
+    </div>
+  ));
+  
+  FolderItem.displayName = 'FolderItem';
+
+  // Memoized file item component for better performance
+  const FileItem = React.memo(({ file, fileIndex, isSelected, isTextFile, wouldAutoSelect, isIgnored }) => (
+    <div className={`tree-item file-item ${!isTextFile ? 'binary-file' : ''} ${!wouldAutoSelect && isTextFile ? 'config-file' : ''} ${isIgnored ? 'ignored-file' : ''}`}>
+      <input
+        type="checkbox"
+        checked={isSelected}
+        onChange={() => handleFileToggle(fileIndex)}
+        className="file-checkbox"
+      />
+      {isTextFile ? <FileCode2 size={14} /> : <File size={14} />}
+      <span>{file.name}</span>
+      {!isTextFile && <span className="file-type-label">Binary</span>}
+      {!wouldAutoSelect && isTextFile && <span className="file-type-label config">Config</span>}
+      {isIgnored && <span className="file-type-label ignored">Ignored</span>}
+      <span className="file-size">{(file.size / 1024).toFixed(1)} KB</span>
+    </div>
+  ));
+  
+  FileItem.displayName = 'FileItem';
+
   // Render file tree recursively
   const renderFileTree = useCallback((node, path = '') => {
     if (!node) return null;
@@ -274,60 +437,49 @@ const FilesPage = () => {
         {Object.entries(node.children).map(([name, child]) => {
           const folderPath = path ? `${path}/${name}` : name;
           const isExpanded = expandedFolders.has(folderPath);
+          const selectionState = folderSelectionStates.get(folderPath) || 0;
           
           return (
-            <div key={folderPath} className="tree-folder">
-              <div 
-                className="tree-item folder-item"
-                onClick={() => toggleFolder(folderPath)}
-              >
-                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                <Folder size={14} />
-                <span>{name}</span>
-              </div>
-              {isExpanded && (
-                <div className="tree-children">
-                  {renderFileTree(child, folderPath)}
-                </div>
-              )}
-            </div>
+            <FolderItem
+              key={folderPath}
+              name={name}
+              child={child}
+              folderPath={folderPath}
+              isExpanded={isExpanded}
+              selectionState={selectionState}
+            />
           );
         })}
         
         {/* Render files */}
         {node.files.map(file => {
-          const fileIndex = processedFiles.findIndex(f => f.path === file.path);
-          const fileData = processedFiles[fileIndex];
-          const isSelected = fileIndex >= 0 && selectedFiles.has(fileIndex);
+          const fileIndex = filePathToIndex.get(file.path);
+          const fileData = fileIndex !== undefined ? processedFiles[fileIndex] : null;
+          const isSelected = fileIndex !== undefined && selectedFiles.has(fileIndex);
           const isTextFile = fileData?.isTextFile !== false;
           const wouldAutoSelect = shouldAutoSelect(file.path);
           const isIgnored = fileData?.isIgnored;
           
           // Skip rendering if file not found in processedFiles
-          if (fileIndex === -1) {
+          if (fileIndex === undefined || !fileData) {
             return null;
           }
           
           return (
-            <div key={file.path} className={`tree-item file-item ${!isTextFile ? 'binary-file' : ''} ${!wouldAutoSelect && isTextFile ? 'config-file' : ''} ${isIgnored ? 'ignored-file' : ''}`}>
-              <input
-                type="checkbox"
-                checked={isSelected}
-                onChange={() => handleFileToggle(fileIndex)}
-                className="file-checkbox"
-              />
-              {isTextFile ? <FileCode2 size={14} /> : <File size={14} />}
-              <span>{file.name}</span>
-              {!isTextFile && <span className="file-type-label">Binary</span>}
-              {!wouldAutoSelect && isTextFile && <span className="file-type-label config">Config</span>}
-              {isIgnored && <span className="file-type-label ignored">Ignored</span>}
-              <span className="file-size">{(file.size / 1024).toFixed(1)} KB</span>
-            </div>
+            <FileItem
+              key={file.path}
+              file={file}
+              fileIndex={fileIndex}
+              isSelected={isSelected}
+              isTextFile={isTextFile}
+              wouldAutoSelect={wouldAutoSelect}
+              isIgnored={isIgnored}
+            />
           );
         })}
       </div>
     );
-  }, [processedFiles, selectedFiles, expandedFolders, handleFileToggle, toggleFolder, shouldAutoSelect]);
+  }, [expandedFolders, folderSelectionStates, filePathToIndex, processedFiles, selectedFiles, shouldAutoSelect]);
 
   return (
     <div className="container">
@@ -343,10 +495,10 @@ const FilesPage = () => {
           <div className="bento-box sources-box">
             <div className="box-header">
               <FileText />
-              <h2>Sources ({processedFiles.length})</h2>
+              <h2>{t('files.sources.title')} ({processedFiles.length})</h2>
               <button className="clear-all-btn" onClick={handleClearAll}>
                 <Trash2 size={16} />
-                Clear All
+{t('files.sources.clear')}
               </button>
             </div>
             {/* Show file tree if available, otherwise show flat list */}
@@ -370,9 +522,9 @@ const FilesPage = () => {
                       />
                       {isTextFile ? <FileCode2 size={14} /> : <File size={14} />}
                       <span className="source-name">{file.path || file.name}</span>
-                      {!isTextFile && <span className="file-type-label">Binary</span>}
-                      {!wouldAutoSelect && isTextFile && <span className="file-type-label config">Config</span>}
-                      {isIgnored && <span className="file-type-label ignored">Ignored</span>}
+                      {!isTextFile && <span className="file-type-label">{t('file.type.binary')}</span>}
+                      {!wouldAutoSelect && isTextFile && <span className="file-type-label config">{t('file.type.config')}</span>}
+                      {isIgnored && <span className="file-type-label ignored">{t('file.type.ignored')}</span>}
                       <span className="source-size">{(file.size / 1024).toFixed(1)} KB</span>
                     </div>
                   );
