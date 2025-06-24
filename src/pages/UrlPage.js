@@ -20,6 +20,29 @@ const UrlPage = () => {
     // Add to processed URLs list
     const urlData = { url, content, size: content.length };
     setProcessedUrls([urlData]); // For URLs, we typically only show the latest one
+    
+    // 自动滚动到结果区域，并添加视觉提示
+    setTimeout(() => {
+      const contextElement = document.querySelector('.context-output-box');
+      if (contextElement) {
+        // 添加闪烁动画提示用户注意
+        contextElement.style.transition = 'all 0.3s ease';
+        contextElement.style.transform = 'scale(1.02)';
+        contextElement.style.boxShadow = '0 8px 32px rgba(0, 124, 186, 0.3)';
+        
+        // 滚动到视图
+        contextElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+        
+        // 恢复原始样式
+        setTimeout(() => {
+          contextElement.style.transform = 'scale(1)';
+          contextElement.style.boxShadow = '';
+        }, 1000);
+      }
+    }, 100); // 短延迟确保DOM已更新
   }, []);
 
   const handleDownloadContext = useCallback(() => {
