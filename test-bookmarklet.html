@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试书签工具</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        .test-btn { background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 10px; }
+        .code { background: #f5f5f5; padding: 15px; border-radius: 5px; font-family: monospace; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>书签工具测试页面</h1>
+    
+    <h2>方法1：直接测试</h2>
+    <p>点击下面的按钮来测试书签功能：</p>
+    <button class="test-btn" onclick="testBookmarklet()">🧪 测试书签工具</button>
+    
+    <h2>方法2：复制代码到浏览器控制台</h2>
+    <p>按F12打开开发者工具，在控制台粘贴下面的代码并回车：</p>
+    <div class="code">
+(function(){
+    try{
+        var best=null;
+        var candidates=document.querySelectorAll('article,main,.content,.post-content,.entry-content');
+        if(!candidates.length){candidates=document.querySelectorAll('div');}
+        var bestScore=0;
+        for(var i=0;i<candidates.length;i++){
+            var el=candidates[i];
+            if(!el.textContent)continue;
+            var words=el.textContent.split(/\s+/).length;
+            var score=words;
+            if(words>bestScore&&words>50){bestScore=words;best=el;}
+        }
+        if(!best){
+            for(var i=0;i<candidates.length;i++){
+                var el=candidates[i];
+                var words=el.textContent.split(/\s+/).length;
+                if(words>bestScore&&words>10){bestScore=words;best=el;}
+            }
+        }
+        if(!best)best=document.body;
+        var title=document.title||'Web Content';
+        var content=best.textContent||best.innerText||'';
+        var result='# '+title+'\n\n**URL:** '+location.href+'\n**Captured:** '+new Date().toLocaleString()+'\n\n---\n\n'+content;
+        var win=window.open('','_blank','width=800,height=600');
+        if(win){
+            win.document.write('<html><head><title>Content Extracted</title><style>body{font-family:Arial,sans-serif;margin:20px;line-height:1.6}textarea{width:100%;height:400px;border:1px solid #ddd;padding:10px;font-family:monospace}</style></head><body><h2>Content Extracted</h2><textarea>'+result.replace(/'/g,"&apos;")+'</textarea><br><button onclick="document.querySelector(\'textarea\').select();document.execCommand(\'copy\');alert(\'Copied!\');">Copy</button></body></html>');
+            win.document.close();
+        }
+    }catch(e){
+        alert('Error: '+e.message);
+    }
+})()
+    </div>
+
+    <h2>测试内容</h2>
+    <article class="content">
+        <h1>这是测试文章标题</h1>
+        <p>这是第一段测试内容。这个段落包含足够的文字来测试内容提取功能是否正常工作。</p>
+        <p>这是第二段测试内容。书签工具应该能够识别这个article元素并提取其中的所有文本内容。</p>
+        <h2>子标题</h2>
+        <p>更多测试内容在这里。这些内容应该被完整地提取出来，形成可读的markdown格式。</p>
+    </article>
+
+    <script>
+        function testBookmarklet() {
+            // 执行与书签相同的代码
+            try{
+                var best=null;
+                var candidates=document.querySelectorAll('article,main,.content,.post-content,.entry-content');
+                if(!candidates.length){candidates=document.querySelectorAll('div');}
+                var bestScore=0;
+                for(var i=0;i<candidates.length;i++){
+                    var el=candidates[i];
+                    if(!el.textContent)continue;
+                    var words=el.textContent.split(/\s+/).length;
+                    var score=words;
+                    if(words>bestScore&&words>50){bestScore=words;best=el;}
+                }
+                if(!best){
+                    for(var i=0;i<candidates.length;i++){
+                        var el=candidates[i];
+                        var words=el.textContent.split(/\s+/).length;
+                        if(words>bestScore&&words>10){bestScore=words;best=el;}
+                    }
+                }
+                if(!best)best=document.body;
+                var title=document.title||'Web Content';
+                var content=best.textContent||best.innerText||'';
+                var result='# '+title+'\n\n**URL:** '+location.href+'\n**Captured:** '+new Date().toLocaleString()+'\n\n---\n\n'+content;
+                var win=window.open('','_blank','width=800,height=600');
+                if(win){
+                    win.document.write('<html><head><title>Content Extracted</title><style>body{font-family:Arial,sans-serif;margin:20px;line-height:1.6}textarea{width:100%;height:400px;border:1px solid #ddd;padding:10px;font-family:monospace}</style></head><body><h2>Content Extracted</h2><textarea>'+result.replace(/'/g,"&apos;")+'</textarea><br><button onclick="document.querySelector(\'textarea\').select();document.execCommand(\'copy\');alert(\'Copied!\');">Copy</button></body></html>');
+                    win.document.close();
+                }
+            }catch(e){
+                alert('Error: '+e.message);
+            }
+        }
+    </script>
+</body>
+</html>
