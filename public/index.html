@@ -26,6 +26,39 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-0QKTPX6GDX');
+      
+      // Suppress all Google Analytics related errors
+      const originalConsoleError = console.error;
+      console.error = function(...args) {
+        const message = args.join(' ');
+        if (message.includes('googletagmanager.com') || 
+            message.includes('gtag') || 
+            message.includes('Failed to fetch') && message.includes('frame_ant')) {
+          return;
+        }
+        originalConsoleError.apply(console, args);
+      };
+      
+      window.addEventListener('error', function(e) {
+        if ((e.filename && (e.filename.includes('googletagmanager.com') || e.filename.includes('frame_ant'))) ||
+            (e.message && (e.message.includes('Failed to fetch') || e.message.includes('gtag')))) {
+          e.stopPropagation();
+          e.preventDefault();
+          return true;
+        }
+      }, true);
+      
+      window.addEventListener('unhandledrejection', function(e) {
+        const reason = e.reason;
+        if (reason && (
+            (reason.message && reason.message.includes('Failed to fetch')) ||
+            (reason.stack && (reason.stack.includes('googletagmanager.com') || reason.stack.includes('frame_ant')))
+        )) {
+          e.stopPropagation();
+          e.preventDefault();
+          return true;
+        }
+      }, true);
     </script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
